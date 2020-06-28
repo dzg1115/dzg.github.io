@@ -1,2 +1,2 @@
-# dzg1115.github.io
+# dzg.github.io
 个人博客
