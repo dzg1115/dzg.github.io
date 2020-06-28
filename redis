@@ -1,0 +1,150 @@
+# Redis五大数据类型常用的命令
+
+## 　Key(键):
+
+　　keys * 　　　　　　 　　 　 查看当前库全部key名称。
+　　exists key 　　　　 　　　　判断某个key是否存在。存在返回1，不存在返回0。
+　　move key db 　　　　　　  把当前库某个key移到指定库。
+　　expire key second 　　　　 为指定的key设置过期时间,单位为秒。
+　　ttl key 　　　　　　　　　　 查看指定key还有多少秒过期，-1表示永不过期，-2表示已过期(如果过期该key会被移出库)。
+　　type key 　　　　　　　　  查看你的key是什么数据类型。
+　　del [key...] 　　　　　　　　 删除指定key,可同时删除多个。
+
+ 
+
+------
+
+ 
+
+## 　1.string(字符串):
+
+　　string类型是redis最基本的数据类型，redis中一个字符串value最多可以是512M。
+　　string类型是二进制安全的。意思是redis的string可以包含任何数据。比如jpg图片或者序列化的对象。
+
+ 
+
+　　set 　　　　　　  设置一个key-value。 ***set  key value***															
+　　get 　　　　　　  获取一个key的value。***get key***
+        mset 　　　　　  设置一个或多个key-value。***mset key1 value1 key2 value2*** 
+　　mget 　　　　　  获取一个或多个key的value。***mget key1 key2***
+　　del 　　　　　　  删除一个或多个key-value。***del key***
+　　append 　　　　  对指定key的value追加值。***append key value***
+　　strlen 　　　　　  获取指定key的value的长度。***strlen key***
+
+　　incr 　　　　　　 对指定key的value每次加1。 一定要是数字才能进行加减。 ***incr key***
+　　decr　　　　　　 对指定key的value每次减1。 一定要是数字才能进行加减。 ***decr key***
+　　incrby 　　　　　 对指定key的value每次加n(数量可指定)。***incrby key increment*** 
+　　decrby 　　　　    对指定key的value每次减n(数量可指定)。***decrby key increment***
+
+　　setex(set with expire) 　 设置一个key-value并指定该key的过期时间(秒)。***setex key seconds value****
+　　setnx(set if not exist) 　  设置一个key-value，如果该key存在则不设置，如果不存在则设置。
+　　
+　
+
+------
+
+ 
+
+## 　2.hash(哈希，类似java里的Map):
+
+　　redis hash 是一个键值对集合。redis hash 是一个string类型的field和value的映射表，hash特别适合用于存储对象。**底层使用哈希表结构实现数据存储**
+
+　　类似Java里面的Map<String,Object>。**key filed value**
+
+ 
+
+　　hset 　　　　 添加一个hash集合并往里面添加一对KV。***hset key field value*** 
+　　hget 　　　　 获取hash集合某个Key的数据。***hget key field***
+　　hmset 　　　 添加一个hash集合并往里面添加N对KV。***hmset key field1 value1 field2 value2 …*** 
+　　hmget 　　　 获取hash集合N个Key的数据。***hmget key field1 field2 …*** 
+　　hgetall 　　　 获取hash集合全部的KV数据。***hgetall key***
+　　hdel 　　　　 移除hash集合中的N个Key。***hdel key field1 [field2]***
+
+　　hlen 　　　　 获取hash集合中Key的数量。***hlen key***
+　　hexists 　　　 判断hash集合中某个Key是否存在。***hexists key field***
+　　hkeys 　　　 获取hash集合全部Key。***hkeys key*** 
+　　hvals 　　　 获取hash集合全部Value。***hvals key***
+
+　　hincreby 　　 给hash集合中的某个key加N。***hincrby key field increment*** 
+　　hincrebyfloat  给hash集合中的某个key加小数加N。***hincrbyfloat key field increment***
+　　hsetnx 　　    如果key不存在则添加，存在则不添加。***hsetnx key field value***
+
+ 
+
+------
+
+ 
+
+## 　3.list(列表):
+
+　　　redis list 列表是简单的字符串列表，按照插入顺序排序。你可以添加一个元素到列表的头部（左边）或者尾部（右边）**相当于队列，但是只从左边出**。它的底层实际是个**双向链表。**
+
+　　lpush 　　　添加一个list列表,将一个或多个值插入到列表头部，先进后出。 ***lpush key value1 [value2] ……***
+　　rpush 　　　添加一个list列表,将一个或多个值插入到列表尾部，先进先出。***rpush key value1 [value2] ……*** 
+　　lrange 　　　获取list列表指定区间范围内的值。***lrange key start stop***
+　　lpop 　　　  list列表顶部元素(第一个元素),并返回被移除的元素。***lpop key***
+　　rpop 　　　  list列表底部元素(最后一个元素),并返回被移除的元素。***rpop key***
+　　lindex 　　　按照顶部索引下标获得元素。***lindex key index***
+　　llen 　　　　 取list列表的长度。***llen key*** 
+　　lrem 　　　　移除list列表N个value。***lrem key count value***
+　   blpop              规定时间内获取并移除数据   ***blpop key1 [key2] timeout***
+
+　　**list列表总结：**
+　　　它是一个字符串链表，left、right都可以添加。
+　　　如果键不存在，创建新的链表。
+　　　如果键已存在，新增内容。
+　　　如果值全移除，对应的键也就消失了。
+　　　链表的操作无论是头和尾效率都极高，但假如是对中间元素进行操作，效率就比较低了。
+
+ 
+
+------
+
+ 
+
+## 　4.set(集合):
+
+　　 redis set是string类型的无序集合。它是通过HashTable实现的。与hash存储结构完全相同，仅存储键，不存储值（nil），并且值是不允许重复的 
+
+　　sadd 　　　　　　 将一个或多个成员插入到set集合中。***sadd key member1 [member2]*** 
+　　smembers 　　　　遍历set集合。***smembers key*** 
+　　sismember 　　　 判断指定元素是否是set集合的成员。***sismember key member***
+　　scard 　　　　　　 获取set集合中元素的个数。***scard key*** 
+　　srem 　　　　　　 移除set集合中N个元素。***srem key member1 [member2]***
+　　srandmember 　　 随机获取set集合中N个元素。***srandmember key [count]***
+　　spop　　　　　　 随机移除set集合中N个元素并返回被移除的元素。***spop key [count]***
+　　smove 　　　　　 将指定集合中的某个元素移到目标集合中。***smove source destination member***
+
+　　sdiff 　　　　　　 集合的减集。***sdiffkey1 [key2]*** 
+　　sinter 　　　　　 集合的交集。***sinter key1 [key2]*** 
+　　sunion 　　　　　集合的并集。***sunionkey1 [key2]*** 
+
+​		求两个集合的交、并、差集并存储到指定集合中 
+
+**sinterstore** *destination key1 [key2]*  
+
+**sunionstore** *destination key1 [key2]*  
+
+**sdiffstore** *destination key1 [key2]* 
+
+
+
+------
+
+ 
+
+## 　5.zset(sorted set:有序集合):
+
+　　redis zset 和 set 一样也是string类型元素的集合,且不允许重复的成员。**不同的是每个元素都会关联一个double类型的分数。**　redis正是通过分数来为集合中的成员进行从小到大的排序。zset的成员是唯一的,但分数(score)却可以重复。**key score member**
+
+　　zadd 　　　　 　将一个或多个成员插入到zset集合中。***zadd key score1 member1 [score2 member2]***
+　　zrange 　　　 　 获取zset集合指定区间范围内的值。***zrange key start stop [WITHSCORES]***
+　　zrangebyscore 　   获取zset集合指定分数范围内的值。***zrangebyscore key min max [WITHSCORES] [LIMIT]*** 
+　　zrem 　　　　　　  移除zset集合中N个元素。***zrem key member [member ...]***
+　　zcard 　　　　　　  获取zset集合中元素的个数(不包含分数,分数和元素是一体的)。***zcard key***
+　　zcount 　　　　　　 获取zset集合指定分数范围内的个数。***zcount key min max***
+　　zrank 　　　　　　  获取zset集合某个元素的下标。***zrank key member***
+　　zscore 　　　　　　 获取zset集合某个元素对应的分数。***zscore key member***
+　　zrevrank 　　　　　 逆序获取zset集合某个元素的下标。***zrevrank key member****
+　　zrevrange 　　　　　逆序获取zset集合指定区间范围内的值。***zrevrange key start stop [WITHSCORES]*** 
+　　zrevrangebyscore 　 逆序获取zset集合指定分数范围内的值。***zrevrangebyscore key max min [WITHSCORES]***
